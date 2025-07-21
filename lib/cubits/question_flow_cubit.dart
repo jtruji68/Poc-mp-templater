@@ -37,12 +37,17 @@ class QuestionFlowCubit extends Cubit<QuestionFlowState> {
   QuestionFlowCubit(this.questions) : super(QuestionFlowState.initial());
 
   void submitAnswer(dynamic answer) {
-    final currentQuestion = questions[state.currentIndex];
+    final visibleQuestions = questions.where((q) {
+      if (q.dependsOn == null) return true;
+      return state.answers[q.dependsOn] == q.visibleWhen;
+    }).toList();
+
+    final currentQuestion = visibleQuestions[state.currentIndex];
 
     final updatedAnswers = Map<String, dynamic>.from(state.answers);
     updatedAnswers[currentQuestion.fieldName] = answer;
 
-    if (state.currentIndex + 1 < questions.length) {
+    if (state.currentIndex + 1 < visibleQuestions.length) {
       emit(state.copyWith(
         currentIndex: state.currentIndex + 1,
         answers: updatedAnswers,

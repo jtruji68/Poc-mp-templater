@@ -34,7 +34,6 @@ class PdfService {
     return doc.save();
   }
 
-  /// 🆕 Generic PDF builder from dynamic answers map
   static Future<List<int>> generateFromAnswers(
       Map<String, dynamic> answers, String templateKey) async {
     final doc = pw.Document();
@@ -49,10 +48,25 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 22, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 20),
-              ...answers.entries.map(
-                    (entry) => pw.Text(
-                    '${_prettifyLabel(entry.key)}: ${entry.value ?? 'No especificado'}'),
-              ),
+
+              // Dynamic field rendering
+              ...answers.entries.map((entry) {
+                final label = _prettifyLabel(entry.key);
+                final value = entry.value;
+
+                if (value is Map) {
+                  // handle nested fields (like departamento_ciudad)
+                  return pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: value.entries.map<pw.Widget>((sub) {
+                      final subLabel = _prettifyLabel(sub.key);
+                      return pw.Text('$subLabel: ${sub.value}');
+                    }).toList(),
+                  );
+                } else {
+                  return pw.Text('$label: $value');
+                }
+              }),
             ],
           );
         },

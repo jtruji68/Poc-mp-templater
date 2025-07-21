@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'cubits/theme_cubit.dart';
 import 'screens/home_page.dart';
 import 'screens/form_page.dart';
@@ -39,8 +40,10 @@ class MyApp extends StatelessWidget {
               secondary: const Color(0xFFD7CCC8), // beige-ish
               surface: const Color(0xFFF5F5DC), // light beige
               brightness: Brightness.light,
+
             ),
             useMaterial3: true,
+            textTheme: GoogleFonts.ibmPlexSerifTextTheme(), // 👈 Base for text
           ),
 
           // ✅ Dark Theme: clean + fixed dark surface
@@ -52,6 +55,7 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.dark,
             ),
             useMaterial3: true,
+            textTheme: GoogleFonts.ibmPlexSerifTextTheme(ThemeData.dark().textTheme),
           ),
 
           // ✅ Localization support for Spanish date picker etc.
