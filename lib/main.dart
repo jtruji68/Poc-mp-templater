@@ -9,6 +9,7 @@ import 'cubits/form_cubit.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_ES', null); // ✅ For date picker Spanish labels
   runApp(
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return BlocBuilder<ThemeCubit, ThemeMode>(
       builder: (context, themeMode) {
         return MaterialApp(

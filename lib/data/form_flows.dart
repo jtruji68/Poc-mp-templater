@@ -71,7 +71,7 @@ final tutelaSaludFlow = FlowConfiguration(
       id: "q10",
       fieldName: 'orden_juez',
       questionText: '¿Qué quieres que ordene el juez?',
-      inputType: InputType.custom, // dropdown: Que me den el medicamento, Que autoricen la cirugía, Que me atiendan en casa
+      inputType: InputType.custom, // dropdown: Que me den el medicamento, Que autoricen la cirugía, Que me atiendan en casa, Procedimiento Médico, Suplemento alimenticio
     ),
     Question(
       id: "q11",
@@ -82,7 +82,7 @@ final tutelaSaludFlow = FlowConfiguration(
     Question(
       id: "q12",
       fieldName: 'regimen',
-      questionText: 'Regimen',
+      questionText: '¿Cual es el regimen de afiliación de la EPS?',
       inputType: InputType.custom, // dropdown: Régimen contributivo, Régimen subsidiado
     ),
     Question(
