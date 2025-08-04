@@ -1,13 +1,12 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jd_docgen_frontend/constants/colombia_geo.dart';
-
 import '../cubits/pdf_cubit.dart';
 import '../cubits/question_flow_cubit.dart';
 import '../models/flow_configuration.dart';
 import '../models/question.dart';
 import '../utils/web_download.dart';
+import 'city_dept_widget.dart';
 
 class FormBox extends StatelessWidget {
   final FlowConfiguration config;
@@ -51,7 +50,7 @@ class FormBox extends StatelessWidget {
                 const Text("Tus respuestas:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 12),
                 ...visibleQuestions.map((q) {
-                  final answer = state.answers[q.fieldName];
+                  final answer = state.answers[q.fieldName ?? q.multipleFieldNames?.join('+')] ?? '—';
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Text("\u2022 ${q.questionText}: $answer"),
@@ -76,7 +75,7 @@ class FormBox extends StatelessWidget {
                 const SizedBox(height: 24),
                 const Text('✅', textAlign: TextAlign.center, style: TextStyle(fontSize: 64)),
                 const SizedBox(height: 16),
-                const Text('Este es tu documento para descargar, por favor rev\u00edsalo.', style: TextStyle(fontSize: 18), textAlign: TextAlign.center),
+                const Text('Este es tu documento para descargar, por favor revísalo.', style: TextStyle(fontSize: 18), textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.download),
@@ -95,10 +94,14 @@ class FormBox extends StatelessWidget {
               children: [
                 ...currentVisibleQuestions.map((q) => Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text("\u2022 ${q.questionText}: ${state.answers[q.fieldName] ?? ''}"),
+                  child: Text("\u2022 ${q.questionText}: ${state.answers[q.fieldName ?? q.multipleFieldNames?.join('+')] ?? ''}"),
                 )),
                 const SizedBox(height: 16),
-                _buildQuestionInput(context, question: currentQuestion, onSubmit: (value) => flowCubit.submitAnswer(value)),
+                _buildQuestionInput(
+                  context,
+                  question: currentQuestion,
+                  onSubmit: (value) => flowCubit.submitAnswer(value),
+                ),
               ],
             );
           }
@@ -113,190 +116,100 @@ class FormBox extends StatelessWidget {
   }) {
     final controller = TextEditingController();
 
-    switch (question.fieldName) {
-      case 'departamento_ciudad':
-        String? selectedDepartamento;
-        String? selectedCiudad;
-
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final ciudades = selectedDepartamento != null ? colombiaGeo[selectedDepartamento] ?? [] : [];
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text('Selecciona tu departamento', style: TextStyle(fontSize: 18)),
-                const SizedBox(height: 8),
-                Autocomplete<String>(
-                  optionsBuilder: (text) => colombiaGeo.keys.where((dpto) => dpto.toLowerCase().contains(text.text.toLowerCase())),
-                  onSelected: (selection) {
-                    setState(() {
-                      selectedDepartamento = selection;
-                      selectedCiudad = null;
-                    });
-                  },
-                  fieldViewBuilder: (context, controller, focusNode, onEditingComplete) =>
-                      TextField(controller: controller, focusNode: focusNode, decoration: const InputDecoration(hintText: 'Departamento', border: OutlineInputBorder())),
-                  optionsViewBuilder: (context, onSelected, options) {
-                    return Align(
-                      alignment: Alignment.topLeft,
-                      child: Material(
-                        elevation: 4,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 300),
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            itemCount: options.length,
-                            itemBuilder: (context, index) {
-                              final option = options.elementAt(index);
-                              return ListTile(
-                                title: Text(option),
-                                onTap: () => onSelected(option),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                if (selectedDepartamento != null) ...[
-                  const Text('Selecciona tu ciudad o municipio', style: TextStyle(fontSize: 18)),
-                  const SizedBox(height: 8),
-                  Autocomplete<String>(
-                    optionsBuilder: (text) => ciudades
-                        .where((c) => c.toLowerCase().contains(text.text.toLowerCase()))
-                        .cast<String>(),                    onSelected: (selection) => setState(() => selectedCiudad = selection),
-                    fieldViewBuilder: (context, controller, focusNode, onEditingComplete) =>
-                        TextField(controller: controller, focusNode: focusNode, decoration: const InputDecoration(hintText: 'Ciudad o Municipio', border: OutlineInputBorder())),
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 300),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (context, index) {
-                                final option = options.elementAt(index);
-                                return ListTile(
-                                  title: Text(option),
-                                  onTap: () => onSelected(option),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: selectedDepartamento != null && selectedCiudad != null ? () => onSubmit({ 'departamento': selectedDepartamento, 'ciudad': selectedCiudad }) : null,
-                    child: const Text('Siguiente'),
-                  ),
-                ),
-              ],
-            );
+    switch (question.inputType) {
+      case InputType.cityDept:
+        return DepartamentoCiudadSelector(
+          onSubmit: ({required String departamento, required String ciudad}) {
+            final key1 = question.multipleFieldNames?[0];
+            final key2 = question.multipleFieldNames?[1];
+            if (key1 != null && key2 != null) {
+              onSubmit({key1: departamento, key2: ciudad});
+            }
           },
         );
 
-      case 'tutela_para_quien':
-        return _dropdownMenu(question.questionText, ['Para mí', 'Para un familiar que no puede hacerla por sí mismo'], onSubmit);
-
-      case 'relacion_con_familiar':
-        return _dropdownMenu(question.questionText, ['mamá', 'papá', 'hijo', 'abuelo', 'hermano', 'primo', 'tio'], onSubmit);
-
-      case 'orden_juez':
-        return _dropdownMenu(question.questionText, ['Que me den el medicamento', 'Que autoricen la cirugía', 'Que me atiendan en casa'], onSubmit);
-
-      case 'eps':
-        return _dropdownMenu(question.questionText, ['Sura', 'Nueva EPS'], onSubmit);
-
-      case 'regimen':
-        return _dropdownMenu(question.questionText, ['Régimen contributivo', 'Régimen subsidiado'], onSubmit);
-
-      default:
-        switch (question.inputType) {
-          case InputType.text:
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(question.questionText, style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final value = controller.text.trim();
-                      if (value.isNotEmpty) onSubmit(value);
-                    },
-                    child: const Text('Siguiente'),
-                  ),
-                ),
-              ],
-            );
-          case InputType.date:
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(question.questionText, style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      locale: const Locale('es', ''),
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      onSubmit(picked.toIso8601String().split('T')[0]);
-                    }
-                  },
-                  child: const Text('Seleccionar Fecha'),
-                ),
-              ],
-            );
-          case InputType.boolean:
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(question.questionText, style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => onSubmit(true),
-                      child: const Text('Sí'),
-                    ),
-                    const SizedBox(width: 20),
-                    ElevatedButton(
-                      onPressed: () => onSubmit(false),
-                      child: const Text('No'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          case InputType.custom:
-            return const Text('Custom field not handled');
+      case InputType.custom:
+        switch (question.fieldName) {
+          case 'tutela_para_quien':
+            return _dropdownMenu(question.questionText, ['Para mí', 'Para un familiar que no puede hacerla por sí mismo'], onSubmit);
+          case 'relacion_con_familiar':
+            return _dropdownMenu(question.questionText, ['mamá', 'papá', 'hijo', 'abuelo', 'hermano', 'primo', 'tio'], onSubmit);
+          case 'orden_juez':
+            return _dropdownMenu(question.questionText, ['Que me den el medicamento', 'Que autoricen la cirugía', 'Que me atiendan en casa'], onSubmit);
+          case 'eps':
+            return _dropdownMenu(question.questionText, ['Sura', 'Nueva EPS',
+              'EPS Sanitas','Salud Total','Coosalud',
+              'Savia Salud','Emssanar', 'Asmet Salud','Famisanar','Otro' ], onSubmit);
+          case 'regimen':
+            return _dropdownMenu(question.questionText, ['Régimen contributivo', 'Régimen subsidiado'], onSubmit);
+          default:
+            return const Text('Campo personalizado no manejado');
         }
+
+      case InputType.text:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(question.questionText, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () {
+                  final value = controller.text.trim();
+                  if (value.isNotEmpty) onSubmit(value);
+                },
+                child: const Text('Siguiente'),
+              ),
+            ),
+          ],
+        );
+
+      case InputType.date:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(question.questionText, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  locale: const Locale('es', ''),
+                  initialDate: DateTime(2000),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (picked != null) {
+                  onSubmit(picked.toIso8601String().split('T')[0]);
+                }
+              },
+              child: const Text('Seleccionar Fecha'),
+            ),
+          ],
+        );
+
+      case InputType.boolean:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(question.questionText, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(onPressed: () => onSubmit(true), child: const Text('Sí')),
+                const SizedBox(width: 20),
+                ElevatedButton(onPressed: () => onSubmit(false), child: const Text('No')),
+              ],
+            ),
+          ],
+        );
     }
   }
 

@@ -3,23 +3,29 @@ enum InputType {
   date,
   boolean,
   custom,
+  cityDept, // NEW
 }
 
 class Question {
   final String id;
   final String questionText;
-  final String fieldName;
   final InputType inputType;
-
-  final String? dependsOn; // 👈 New: fieldName of the dependency
-  final dynamic visibleWhen; // 👈 New: condition for showing the question
+  final String fieldName; // for single-field questions
+  final List<String>? multipleFieldNames; // for compound inputs like dept/city
+  final String? dependsOn;
+  final String? visibleWhen;
+  final bool allowsOtherAnswer;
+  final String? helper;
 
   Question({
     required this.id,
     required this.questionText,
-    required this.fieldName,
     required this.inputType,
+    this.fieldName = "",
+    this.multipleFieldNames,
     this.dependsOn,
     this.visibleWhen,
+    this.allowsOtherAnswer = false,
+    this.helper,
   });
 }

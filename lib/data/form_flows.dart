@@ -4,28 +4,91 @@ import '../models/question.dart';
 final tutelaSaludFlow = FlowConfiguration(
   templateKey: 'generateTutela1',
   questions: [
+
     Question(
-      id: "q1",
-      fieldName: 'departamento_ciudad',
-      questionText: 'Selecciona tu departamento y ciudad',
-      inputType: InputType.custom, // we already have it
+      id: "q0",
+      questionText: 'Selecciona el departamento y ciudad donde se va a presentar la tutela',
+      inputType: InputType.cityDept,
+      multipleFieldNames: ['depto_tutela', 'ciudad_tutela'],
     ),
+
     Question(
-      id: 'q2',
+      id: 'q1',
       fieldName: 'tutela_para_quien',
       questionText: '¿Para quién es la tutela?',
-      inputType: InputType.custom, // dropdown: Para mí, Para un familiar que no puede hacerla por sí mismo
+      inputType: InputType.custom,
+    ),
+
+    //  si selecciona Para mi
+    Question(
+      id: 'q2',
+      fieldName: 'nombre_autor',
+      questionText: 'Escribe tu nombre completo',
+      inputType: InputType.text,
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
     ),
     Question(
       id: 'q3',
-      fieldName: 'relacion_con_familiar',
-      questionText: '¿Qué relación tienes con esa persona?',
-      inputType: InputType.custom, // dropdown: mamá, papá, hijo, abuelo, hermano, tio
+      fieldName: 'nombre_autor',
+      questionText: 'Escribe tu nombre completo',
+      inputType: InputType.text,
       dependsOn: 'tutela_para_quien',
-      visibleWhen: 'Para un familiar que no puede hacerla por sí mismo',
+      visibleWhen: 'Para mí',
     ),
     Question(
       id: 'q4',
+      questionText: 'Escribe to número de identificación',
+      fieldName: 'id_autor',
+      inputType: InputType.text,
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
+    ),
+    Question(
+      id: "q5",
+      questionText: 'Selecciona el departamento y ciudad donde solicitaste tu documento de identificación',
+      inputType: InputType.cityDept,
+      multipleFieldNames: ['id_autor_depto', 'id_autor_ciudad'],
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
+    ),
+    Question(
+      id: "q6",
+      questionText: 'Selecciona el departamento y ciudad donde resides actualmente',
+      inputType: InputType.cityDept,
+      multipleFieldNames: ['id_autor_depto_res', 'id_autor_ciudad_res'],
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
+    ),
+    Question(
+      id: "q7",
+      fieldName: 'edad_afectado',
+      questionText: 'Escribe tu edad',
+      inputType: InputType.text,
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
+    ),
+    Question(
+      id: "q8",
+      fieldName: 'telefono_autor',
+      questionText: 'Escribe tu telefono de contacto',
+      inputType: InputType.text,
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
+    ),
+    Question(
+      id: "q9",
+      fieldName: 'correo_autor',
+      questionText: 'Escribe tu correo electrónico',
+      inputType: InputType.text,
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para mí',
+    ),
+
+    // fin de preguntas para mi
+
+    Question(
+      id: 'q10',
       questionText: '¿Cuál es el nombre del familiar?',
       fieldName: 'nombre_familiar',
       inputType: InputType.text,
@@ -33,79 +96,54 @@ final tutelaSaludFlow = FlowConfiguration(
       visibleWhen: 'Para un familiar que no puede hacerla por sí mismo',
     ),
     Question(
-      id: 'q5',
+      id: 'q11',
       questionText: '¿Número de identificación del familiar?',
       fieldName: 'id_familiar',
       inputType: InputType.text,
       dependsOn: 'tutela_para_quien',
       visibleWhen: 'Para un familiar que no puede hacerla por sí mismo',
     ),
-    Question(
-      id: 'q6',
-      questionText: 'Nombre Completo de quien diligencia',
-      fieldName: 'nombre_autor',
-      inputType: InputType.text,
-    ),
 
-    Question(
-      id: 'q7',
-      questionText: 'Número de identificación de quien diligencia',
-      fieldName: 'id_autor',
-      inputType: InputType.text,
-    ),
+    //Preguntas restantes
 
-    Question(
-      id: 'q8',
-      fieldName: 'orden_medica',
-      questionText: '¿Qué te ordenó el médico y no te han dado?',
-      inputType: InputType.text,
-    ),
-    Question(
-      id: 'q9',
-      questionText: '¿Desde cuándo estás esperando ese servicio o medicamento?',
-      fieldName: 'fecha_espera',
-      inputType: InputType.date, // we already have i think but with other name
-    ),
-
-    Question(
-      id: "q10",
-      fieldName: 'orden_juez',
-      questionText: '¿Qué quieres que ordene el juez?',
-      inputType: InputType.custom, // dropdown: Que me den el medicamento, Que autoricen la cirugía, Que me atiendan en casa, Procedimiento Médico, Suplemento alimenticio
-    ),
-    Question(
-      id: "q11",
-      fieldName: 'eps',
-      questionText: 'EPS',
-      inputType: InputType.custom, // dropdown: Sura, Nueva EPS
-    ),
     Question(
       id: "q12",
+      fieldName: 'eps',
+      questionText: 'EPS',
+      inputType: InputType.custom,
+      allowsOtherAnswer: true
+    ),
+    Question(
+      id: "q13",
       fieldName: 'regimen',
       questionText: '¿Cual es el regimen de afiliación de la EPS?',
-      inputType: InputType.custom, // dropdown: Régimen contributivo, Régimen subsidiado
+      inputType: InputType.custom,
     ),
-    Question(
-      id: 'q13',
-      fieldName: 'hechos',
-      questionText: 'Cuenta brevemente qué ha pasado (relato de los hechos)',
-      inputType: InputType.text,
-    ),
+
     Question(
       id: 'q14',
-      fieldName: 'telefono',
-      questionText: 'Teléfono',
+      fieldName: 'diagnostico',
+      questionText: 'Cual es tu diagnostico',
       inputType: InputType.text,
     ),
     Question(
       id: 'q15',
-      fieldName: 'mail',
-      questionText: 'Correo',
+      fieldName: 'servicios_medicos_exigidos',
+      questionText: '¿Qué tratamiento, procedimiento o suministro '
+          'de medicamento necesita actualmente y que fue ordenado '
+          'por su médico tratante?',
       inputType: InputType.text,
+    ),
+    Question(
+      id: 'q16',
+      fieldName: 'grupo_especial',
+      questionText: '¿Es usted adulto mayor, menor de edad, '
+          'persona con discapacidad, víctima del conflicto o '
+          'pertenece a población vulnerable?',
+      inputType: InputType.custom,
     ),
   ],
 );
-
 FlowConfiguration getFlowByType(String type) {
   switch (type) {
     case 'tutela_salud':
