@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-
-// Import your colombiaGeo map
 import '../constants/colombia_geo.dart';
 
 class DepartamentoCiudadSelector extends StatefulWidget {
-  final void Function({required String departamento, required String ciudad}) onSubmit;
+  final void Function(Map<String, String> result) onSubmit;
+  final String label;
+  final String? helper;
+  final List<String> fieldNames;
 
-  const DepartamentoCiudadSelector({super.key, required this.onSubmit});
+  const DepartamentoCiudadSelector({
+    super.key,
+    required this.onSubmit,
+    required this.label,
+    required this.fieldNames,
+    this.helper,
+  });
 
   @override
   State<DepartamentoCiudadSelector> createState() => _DepartamentoCiudadSelectorState();
@@ -16,6 +23,45 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
   String? selectedDepartamento;
   String? selectedCiudad;
 
+  Widget buildLabelWithHelper(String text, String? helperText) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(fontSize: 18, color: Colors.black),
+        children: [
+          TextSpan(text: text),
+          if (helperText != null)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Tooltip(
+                message: helperText,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'i',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ciudades = selectedDepartamento != null ? colombiaGeo[selectedDepartamento] ?? [] : [];
@@ -23,6 +69,9 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        buildLabelWithHelper(widget.label, widget.helper),
+        const SizedBox(height: 20),
+
         const Text('Selecciona tu departamento', style: TextStyle(fontSize: 18)),
         const SizedBox(height: 8),
         Autocomplete<String>(
@@ -38,7 +87,7 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
           fieldViewBuilder: (context, controller, focusNode, onEditingComplete) =>
               LayoutBuilder(
                 builder: (context, constraints) => ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500,),
+                  constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
                   child: TextField(
                     controller: controller,
                     focusNode: focusNode,
@@ -55,7 +104,7 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
               child: Material(
                 elevation: 4.0,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400,),
+                  constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: options.length,
@@ -72,7 +121,9 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
             );
           },
         ),
+
         const SizedBox(height: 16),
+
         if (selectedDepartamento != null) ...[
           const Text('Selecciona tu ciudad o municipio', style: TextStyle(fontSize: 18)),
           const SizedBox(height: 8),
@@ -89,7 +140,7 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
             fieldViewBuilder: (context, controller, focusNode, onEditingComplete) =>
                 LayoutBuilder(
                   builder: (context, constraints) => ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400,),
+                    constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400),
                     child: TextField(
                       controller: controller,
                       focusNode: focusNode,
@@ -106,7 +157,7 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
                 child: Material(
                   elevation: 4.0,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400,maxHeight: 300),
+                    constraints: const BoxConstraints(maxWidth: 400, maxHeight: 300),
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
                       itemCount: options.length,
@@ -124,15 +175,19 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
             },
           ),
         ],
+
         const SizedBox(height: 24),
         Align(
           alignment: Alignment.centerRight,
           child: ElevatedButton(
             onPressed: selectedDepartamento != null && selectedCiudad != null
-                ? () => widget.onSubmit(
-              departamento: selectedDepartamento!,
-              ciudad: selectedCiudad!,
-            )
+                ? () {
+              final result = {
+                widget.fieldNames[0]: selectedDepartamento!,
+                widget.fieldNames[1]: selectedCiudad!,
+              };
+              widget.onSubmit(result);
+            }
                 : null,
             child: const Text('Siguiente'),
           ),

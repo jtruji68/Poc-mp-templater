@@ -1,3 +1,4 @@
+
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -13,6 +14,8 @@ class PdfService {
     final calibriFont = pw.Font.ttf(await rootBundle.load('assets/fonts/calibri.ttf'));
     final cambriaBoldFont = pw.Font.ttf(await rootBundle.load('assets/fonts/cambria-bold.ttf'));
     final calibriBoldFont = pw.Font.ttf(await rootBundle.load('assets/fonts/calibri-bold.ttf'));
+
+    print("ANSWERS: " + answers.toString());
 
     final titleStyle = pw.TextStyle(
       fontSize: 14,
@@ -41,6 +44,8 @@ class PdfService {
     final bool esTutelaParaAutor = answers['tutela_para_quien'] == 'Para mí';
     final fechaPresentacionTutela = answers['fecha_tutela'] == '';
     final diagnostico = answers['diagnostico'] ?? '';
+    final historiaClinica = answers["tiene_historia_clinica"]?? false;
+    final ordenMedica = answers["tiene_historia_clinica"] ?? false;
 
 
     //Aqui van las respuestas del autor
@@ -75,6 +80,8 @@ class PdfService {
     String afectadoResidenciaCiudad = "";
     String edadAfectado = "";
 
+    String diagnosticoTexto = "";
+
     String intro, hechos, peticion1, peticion2, peticion3 = "";
 
     if(esTutelaParaAutor){
@@ -86,15 +93,19 @@ class PdfService {
       afectadoResidenciaCiudad = answers['id_autor_ciudad_res'] ?? 'ciudad de residencia del autor';
       edadAfectado = answers['edad_afectado'] ?? '99';
 
+      if(diagnostico != ""){
+        diagnosticoTexto = " y fui diagnosticado con $diagnostico.";
+      }
+      else {
+    diagnosticoTexto = ".";
+    }
       intro = 'Yo, $afectadoNombre, mayor de edad, identificado(a) con cédula de ciudadanía No. $afectadoCedula, domiciliado(a) en la ciudad de $afectadoResidenciaCiudad, actuando en nombre propio, me permito presentar acción de tutela con fundamento en el artículo 86 de la Constitución Política y el Decreto 2591 de 1991, con el fin de obtener la protección urgente de mis derechos fundamentales a la salud, vida digna e integridad personal, los cuales han sido vulnerados por la omisión de mi entidad promotora de salud $eps.';
-      hechos = '\n1. Me encuentro afiliado(a) a la EPS $eps, en el régimen $regimen.\n\n2. Tengo $edadAfectado años y fui diagnosticado con $diagnostico.\n\n3. El médico tratante me ordenó la prestación de los siguientes servicios médicos: $serviciosExigidos.\n\n4. Pese a la orden médica y a las múltiples solicitudes realizadas, la EPS no ha materializado oportunamente los servicios médicos requeridos.\n\n5. Esta omisión ha generado un deterioro progresivo de mi salud, afectando mi vida digna, bienestar físico y emocional.\n\n6. No cuento con los recursos económicos para adquirir directamente estos servicios de forma particular, lo que aumenta mi situación de vulnerabilidad.';
+      hechos = '\n1. Me encuentro afiliado(a) a la EPS $eps, en el régimen $regimen.\n\n2. Tengo $edadAfectado años$diagnosticoTexto\n\n3. El médico tratante me ordenó la prestación de los siguientes servicios médicos: $serviciosExigidos.\n\n4. Pese a la orden médica y a las múltiples solicitudes realizadas, la EPS no ha materializado oportunamente los servicios médicos requeridos.\n\n5. Esta omisión ha generado un deterioro progresivo de mi salud, afectando mi vida digna, bienestar físico y emocional.\n\n6. No cuento con los recursos económicos para adquirir directamente estos servicios de forma particular, lo que aumenta mi situación de vulnerabilidad.';
       if (grupoEspecialAlQuePertenence.isNotEmpty) {
         hechos += ' Pertenezco a un grupo de especial protección constitucional, soy parte de $grupoEspecialAlQuePertenence, lo cual implica una mayor obligación del Estado en garantizar mis derechos fundamentales. Esta condición refuerza la necesidad de una respuesta urgente y efectiva por parte de la entidad accionada, conforme a los principios de igualdad material y enfoque diferencial consagrados en la Constitución Política y desarrollados por la jurisprudencia constitucional.';
       }
       peticion1 = '\n1. TUTELAR mis derechos fundamentales invocados.';
-      peticion2 = '2. ORDENAR a la EPS $eps que, dentro de las cuarenta y ocho (48) horas siguientes, realice todas las gestiones necesarias para autorizar, suministrar y/o entregar efectivamente los servicios médicos requeridos consistentes en $serviciosExigidos en las cantidades y periodicidad ordenadas por el médico tratante.';
-      peticion3 = '3. ORDENAR que la entrega de dichos insumos sea continua, prioritaria y sin imponer barreras administrativas que dilaten o interrumpan la atención.';
-
+      peticion2 = '2. Que se ordene a $eps la entrega de $serviciosExigidos.';
     }else {
 
       afectadoNombre = answers['nombre_afectado'] ?? 'Nombre completo de afectado';
@@ -105,8 +116,15 @@ class PdfService {
       afectadoResidenciaCiudad = answers['id_afectado_ciudad_res'] ?? 'ciudad de residencia del afectado';
       edadAfectado = answers['edad_afectado'] ?? '99';
 
+      if(diagnostico != ""){
+        diagnosticoTexto = " y fue diagnosticado con $diagnostico.";
+      }
+      else {
+        diagnosticoTexto = ".";
+      }
+
       intro = 'Yo, $autorNombre, mayor de edad, identificado(a) con cédula de ciudadanía No. $autorCedula, domiciliado(a) en la ciudad de $autorResidenciaCiudad, actuando como agente oficioso de $afectadoNombre, identificado(a) con cédula de ciudadanía No. $afectadoCedula acudo respetuosamente ante su Despacho para promover ACCIÓN DE TUTELA, de conformidad con el artículo 86 de la Constitución Política y los Decretos 2591 de 1991 y 1382 de 2000, con el fin de que se protejan los derechos fundamentales vulnerados por la EPS $eps.';
-      hechos = '\n1. Mi agenciado se encuentra afiliado(a) a la EPS $eps, en el régimen $regimen.\n\n2. Tiene $edadAfectado años y fue diagnosticado con $diagnostico.\n\n3. El médico tratante le ordenó la prestación de los siguientes servicios médicos: $serviciosExigidos. Pese a la orden médica y a las múltiples solicitudes realizadas, la EPS no ha materializado oportunamente los servicios médicos requeridos.\n\n4. Esta omisión ha generado un deterioro progresivo en la salud del agenciado, afectando su vida digna, bienestar físico y emocional.\n\n5. No contamos con los recursos económicos para adquirir directamente estos servicios de forma particular, lo que aumenta la situación de vulnerabilidad.';
+      hechos = '\n1. Mi agenciado se encuentra afiliado(a) a la EPS $eps, en el régimen $regimen.\n\n2. Tiene $edadAfectado años$diagnosticoTexto\n\n3. El médico tratante le ordenó la prestación de los siguientes servicios médicos: $serviciosExigidos. Pese a la orden médica y a las múltiples solicitudes realizadas, la EPS no ha materializado oportunamente los servicios médicos requeridos.\n\n4. Esta omisión ha generado un deterioro progresivo en la salud del agenciado, afectando su vida digna, bienestar físico y emocional.\n\n5. No contamos con los recursos económicos para adquirir directamente estos servicios de forma particular, lo que aumenta la situación de vulnerabilidad.';
       if (grupoEspecialAlQuePertenence.isNotEmpty) {
         hechos += ' El afectado pertenece a un grupo de especial protección constitucional, es $grupoEspecialAlQuePertenence, lo cual implica una mayor obligación del Estado en garantizar sus derechos fundamentales. Esta condición refuerza la necesidad de una respuesta urgente y efectiva por parte de la entidad accionada, conforme a los principios de igualdad material y enfoque diferencial consagrados en la Constitución Política y desarrollados por la jurisprudencia constitucional.';
       }
@@ -145,7 +163,10 @@ class PdfService {
           pw.Paragraph(text: '\nBajo la gravedad de Juramento manifiesto, no haber instaurado otra Acción de Tutela con fundamento en los mismos hechos y derechos y en contra de la misma Entidad a que se contrae la presente, ante ninguna Autoridad Judicial (Artículo 10 Decreto 2591 de 1991).', style: bodyStyle),
           pw.Center(child :(pw.Text('VI. PRUEBAS\n', style: subtitleStyle))),
           pw.Bullet(text: 'Copia de la cédula.', style: bodyStyle),
+
+          if(ordenMedica)
           pw.Bullet(text: 'Copia de la orden médica.', style: bodyStyle),
+          if(historiaClinica)
           pw.Bullet(text: 'Historia clínica reciente.', style: bodyStyle),
           pw.Center( child: pw.Text('VII. NOTIFICACIONES\n', style: subtitleStyle)),
           pw.Paragraph(text: '\nACCIONANTE:\n\n\n\nDirección: $direccion, $autorResidenciaCiudad $autorResidenciaDepto,\nTeléfono: $telefono\nCorreo electrónico: $correo\n\nRespetuosamente,\n\n_________________________\n$autorNombre\nC.C. No. $autorCedula de $autorResidenciaCiudad, $autorResidenciaDepto', style: bodyStyle),

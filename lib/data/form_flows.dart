@@ -10,13 +10,15 @@ final tutelaSaludFlow = FlowConfiguration(
       questionText: 'Selecciona el departamento y ciudad donde se va a presentar la tutela',
       inputType: InputType.cityDept,
       multipleFieldNames: ['depto_tutela', 'ciudad_tutela'],
+      helper: "En que parte se va a presentar la tutela"
     ),
 
     Question(
       id: 'q1',
       fieldName: 'tutela_para_quien',
       questionText: '¿Para quién es la tutela?',
-      inputType: InputType.custom,
+      inputType: InputType.dropdown,
+      helper: "Quien es el afectado?"
     ),
 
     //  si selecciona Para mi
@@ -27,14 +29,7 @@ final tutelaSaludFlow = FlowConfiguration(
       inputType: InputType.text,
       dependsOn: 'tutela_para_quien',
       visibleWhen: 'Para mí',
-    ),
-    Question(
-      id: 'q3',
-      fieldName: 'nombre_autor',
-      questionText: 'Escribe tu nombre completo',
-      inputType: InputType.text,
-      dependsOn: 'tutela_para_quien',
-      visibleWhen: 'Para mí',
+        helper: "Cual es tu nombre?"
     ),
     Question(
       id: 'q4',
@@ -54,7 +49,7 @@ final tutelaSaludFlow = FlowConfiguration(
     ),
     Question(
       id: "q6",
-      questionText: 'Selecciona el departamento y ciudad donde resides actualmente',
+      questionText: 'Selecciona el departamento y ciudad donde resides actualmente', // por favor añadir el ayuda
       inputType: InputType.cityDept,
       multipleFieldNames: ['id_autor_depto_res', 'id_autor_ciudad_res'],
       dependsOn: 'tutela_para_quien',
@@ -68,6 +63,7 @@ final tutelaSaludFlow = FlowConfiguration(
       dependsOn: 'tutela_para_quien',
       visibleWhen: 'Para mí',
     ),
+
     Question(
       id: "q8",
       fieldName: 'telefono_autor',
@@ -97,7 +93,7 @@ final tutelaSaludFlow = FlowConfiguration(
     ),
     Question(
       id: 'q11',
-      questionText: '¿Número de identificación del familiar?',
+      questionText: '¿Número de identificación del afectado?', // ayuda
       fieldName: 'id_familiar',
       inputType: InputType.text,
       dependsOn: 'tutela_para_quien',
@@ -110,21 +106,21 @@ final tutelaSaludFlow = FlowConfiguration(
       id: "q12",
       fieldName: 'eps',
       questionText: 'EPS',
-      inputType: InputType.custom,
+      inputType: InputType.dropdown,
       allowsOtherAnswer: true
     ),
     Question(
       id: "q13",
       fieldName: 'regimen',
-      questionText: '¿Cual es el regimen de afiliación de la EPS?',
-      inputType: InputType.custom,
+      questionText: '¿Cual es el regimen de afiliación de la EPS?', // info
+      inputType: InputType.dropdown,
     ),
 
     Question(
       id: 'q14',
       fieldName: 'diagnostico',
-      questionText: 'Cual es tu diagnostico',
-      inputType: InputType.text,
+      questionText: 'Tienes un diagnóstico?',
+      inputType: InputType.yesOrNo,
     ),
     Question(
       id: 'q15',
@@ -140,7 +136,19 @@ final tutelaSaludFlow = FlowConfiguration(
       questionText: '¿Es usted adulto mayor, menor de edad, '
           'persona con discapacidad, víctima del conflicto o '
           'pertenece a población vulnerable?',
-      inputType: InputType.custom,
+      inputType: InputType.yesOrNo,
+    ),
+    Question(
+      id: 'q16',
+      fieldName: 'tiene_historia_clinica',
+      questionText: '¿Tienes historia clinica?',
+      inputType: InputType.boolean,
+    ),
+    Question(
+      id: 'q16',
+      fieldName: 'tienes_orden_medica',
+      questionText: '¿Tienes orden medica físcica o virtual?',
+      inputType: InputType.boolean,
     ),
   ],
 );

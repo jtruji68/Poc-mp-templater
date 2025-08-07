@@ -2,8 +2,9 @@ enum InputType {
   text,
   date,
   boolean,
-  custom,
   cityDept, // NEW
+  dropdown,
+  yesOrNo,
 }
 
 class Question {

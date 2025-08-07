@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:jd_docgen_frontend/services/pdf_service.dart';
 
+
 void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es', null);
@@ -30,22 +31,23 @@ void main() async {
         testName: 'Para mi + grupo especial',
         filename: 'tutela_para_mi_grupo_especial.pdf',
         answers: {
-          'tutela_para_quien': 'Para mí',
-          'ciudad_tutela': 'Medellín',
           'depto_tutela': 'Antioquia',
+          'ciudad_tutela': 'Medellín',
+          'tutela_para_quien': 'Para mí',
           'nombre_autor': 'Juan Pérez',
           'id_autor': '123456789',
           'id_autor_depto': 'Antioquia',
           'id_autor_ciudad': 'Medellín',
           'id_autor_depto_res': 'Antioquia',
           'id_autor_ciudad_res': 'Medellín',
+          'edad_afectado': '34',
           'eps': 'Sura',
           'regimen': 'Régimen contributivo',
-          'edad_afectado': '34',
           'diagnostico': 'Lesión de rodilla severa',
           'servicios_medicos_exigidos': 'Cirugía de rodilla, rehabilitación, medicamentos',
           'grupo_especial': 'Indígena',
           'direccion_autor': 'Calle Falsa 123',
+
           'telefono_autor': '3001234567',
           'correo_autor': 'juan@example.com',
         },
