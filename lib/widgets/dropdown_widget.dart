@@ -23,6 +23,25 @@ class DropdownSelector extends StatefulWidget {
 class _DropdownSelectorState extends State<DropdownSelector> {
   String? selectedOption;
   final TextEditingController otherController = TextEditingController();
+  final TextEditingController dropdownController = TextEditingController(); // ✨ manually resettable
+
+  @override
+  void initState() {
+    super.initState();
+    selectedOption = null;
+    dropdownController.clear(); // ✨ force reset value
+  }
+
+  @override
+  void didUpdateWidget(DropdownSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.label != widget.label) {
+      // ✨ reset everything if label (i.e. the question) changes
+      selectedOption = null;
+      dropdownController.clear();
+      otherController.clear();
+    }
+  }
 
   List<String> get fullOptions {
     final opts = List<String>.from(widget.options);
@@ -35,38 +54,54 @@ class _DropdownSelectorState extends State<DropdownSelector> {
   @override
   void dispose() {
     otherController.dispose();
+    dropdownController.dispose();
     super.dispose();
   }
 
   Widget buildLabelWithHelper(String text, String? helperText) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 18))),
-        if (helperText != null)
-          Tooltip(
-            message: helperText,
-            child: Container(
-              margin: const EdgeInsets.only(left: 8),
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'i',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+    // Inherit the current themed default text style, then tweak the size
+    final baseStyle = DefaultTextStyle.of(context).style.copyWith(fontSize: 18);
+
+    // Make the helper badge adapt to theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final badgeBg = isDark ? Colors.white24 : Colors.grey.shade300;
+    final badgeFg = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
+
+    return RichText(
+      text: TextSpan(
+        style: baseStyle, // <- themed color now
+        children: [
+          TextSpan(text: text),
+          if (helperText != null)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Tooltip(
+                message: helperText,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: badgeBg,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'i',
+                      style: baseStyle.copyWith(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        color: badgeFg,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -77,49 +112,20 @@ class _DropdownSelectorState extends State<DropdownSelector> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-    RichText(
-    text: TextSpan(
-    style: const TextStyle(fontSize: 18, color: Colors.black),
-    children: [
-    TextSpan(text: widget.label),
-    if (widget.helper != null)
-    WidgetSpan(
-    alignment: PlaceholderAlignment.middle,
-    child: Tooltip(
-    message: widget.helper!,
-    child: Padding(
-    padding: const EdgeInsets.only(left: 4),
-    child: Container(
-    width: 18,
-    height: 18,
-    decoration: BoxDecoration(
-    color: Colors.grey.shade300,
-    shape: BoxShape.circle,
-    ),
-    alignment: Alignment.center,
-    child: const Text(
-    'i',
-    style: TextStyle(
-    fontSize: 12,
-    fontStyle: FontStyle.italic,
-    fontWeight: FontWeight.bold,
-    color: Colors.black87,
-    ),
-    ),
-    ),
-    ),
-    ),
-    ),
-    ],
-    ),
-    ),
+        buildLabelWithHelper(widget.label, widget.helper),
         const SizedBox(height: 12),
         DropdownMenu<String>(
           width: 400,
-          initialSelection: selectedOption,
-          onSelected: (value) => setState(() {
-            selectedOption = value;
-          }),
+          initialSelection: null,
+          controller: dropdownController, // ✨ ensure external reset
+          onSelected: (value) {
+            setState(() {
+              selectedOption = value;
+              if (value != 'Otro') {
+                otherController.clear(); // just in case
+              }
+            });
+          },
           dropdownMenuEntries: fullOptions
               .map((opt) => DropdownMenuEntry(value: opt, label: opt))
               .toList(),

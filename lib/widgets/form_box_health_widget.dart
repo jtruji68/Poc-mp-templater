@@ -107,28 +107,40 @@ class FormBox extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ...currentVisibleQuestions.map((q) {
-                    final key = (q.multipleFieldNames) != null
-                        ? q.multipleFieldNames?.join('+')
-                        : q.fieldName;
+                    String answer;
 
-                    final rawAnswer = state.answers[key];
-                    final answer = () {
-                      if (rawAnswer is Map<String, dynamic>) {
-                        return rawAnswer.values.join(', ');
-                      }
-                      return rawAnswer?.toString() ?? '—';
-                    }();
+                    if (q.multipleFieldNames != null && q.multipleFieldNames!.isNotEmpty) {
+                      // Collect each individual field answer
+                      answer = q.multipleFieldNames!
+                          .map((fieldName) => state.answers[fieldName]?.toString())
+                          .where((value) => value != null && value.isNotEmpty)
+                          .join(', ');
+                    } else {
+                      answer = state.answers[q.fieldName]?.toString() ?? '—';
+                    }
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: SelectableText("• ${q.questionText}: $answer"),
                     );
                   }),
                   const SizedBox(height: 16),
+
+
+
+
                   _buildQuestionInput(
-                    context,
-                    question: currentQuestion,
-                    onSubmit: (value) => flowCubit.submitAnswer(value),
-                  ),
+          context,
+          question: currentQuestion,
+          onSubmit: (value) {
+            if (value is Map<String, dynamic>) {
+              flowCubit.submitAnswer(value); // Send all key-value pairs in 1 go
+            } else {
+              flowCubit.submitAnswer(value);
+            }
+          print(value);
+          },
+          ),
                 ],
               ),
             );
@@ -145,9 +157,17 @@ class FormBox extends StatelessWidget {
     final controller = TextEditingController();
 
     Widget buildLabelWithHelper(String text, String? helperText) {
+      // Inherit the current themed default text style, then tweak the size
+      final baseStyle = DefaultTextStyle.of(context).style.copyWith(fontSize: 18);
+
+      // Make the helper badge adapt to theme
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final badgeBg = isDark ? Colors.white24 : Colors.grey.shade300;
+      final badgeFg = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
+
       return RichText(
         text: TextSpan(
-          style: const TextStyle(fontSize: 18, color: Colors.black),
+          style: baseStyle, // <- themed color now
           children: [
             TextSpan(text: text),
             if (helperText != null)
@@ -161,17 +181,17 @@ class FormBox extends StatelessWidget {
                       width: 18,
                       height: 18,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: badgeBg,
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
+                      child: Text(
                         'i',
-                        style: TextStyle(
+                        style: baseStyle.copyWith(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: badgeFg,
                         ),
                       ),
                     ),

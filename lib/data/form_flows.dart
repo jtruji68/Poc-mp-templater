@@ -10,7 +10,7 @@ final tutelaSaludFlow = FlowConfiguration(
       questionText: 'Selecciona el departamento y ciudad donde se va a presentar la tutela',
       inputType: InputType.cityDept,
       multipleFieldNames: ['depto_tutela', 'ciudad_tutela'],
-      helper: "En que parte se va a presentar la tutela"
+      helper: "En que juzgado se va a presentar la tutela"
     ),
 
     Question(
@@ -21,39 +21,44 @@ final tutelaSaludFlow = FlowConfiguration(
       helper: "Quien es el afectado?"
     ),
 
+
+    Question(
+        id: 'q28',
+        fieldName: 'nombre_autor',
+        questionText: 'Escribe tu nombre completo, no el del afectado',
+        inputType: InputType.text,
+        helper: "Cual es tu nombre?",
+        dependsOn: "tutela_para_quien",
+        visibleWhen: "Para un familiar que no puede hacerla por sí mismo"
+    ),
+
     //  si selecciona Para mi
     Question(
       id: 'q2',
       fieldName: 'nombre_autor',
       questionText: 'Escribe tu nombre completo',
       inputType: InputType.text,
-      dependsOn: 'tutela_para_quien',
-      visibleWhen: 'Para mí',
-        helper: "Cual es tu nombre?"
+        helper: "Cual es tu nombre?",
+      dependsOn: "tutela_para_quien",
+      visibleWhen: "Para mí"
     ),
     Question(
       id: 'q4',
-      questionText: 'Escribe to número de identificación',
+      questionText: 'Escribe tu número de identificación',
       fieldName: 'id_autor',
       inputType: InputType.text,
-      dependsOn: 'tutela_para_quien',
-      visibleWhen: 'Para mí',
     ),
     Question(
       id: "q5",
       questionText: 'Selecciona el departamento y ciudad donde solicitaste tu documento de identificación',
       inputType: InputType.cityDept,
       multipleFieldNames: ['id_autor_depto', 'id_autor_ciudad'],
-      dependsOn: 'tutela_para_quien',
-      visibleWhen: 'Para mí',
     ),
     Question(
       id: "q6",
       questionText: 'Selecciona el departamento y ciudad donde resides actualmente', // por favor añadir el ayuda
       inputType: InputType.cityDept,
       multipleFieldNames: ['id_autor_depto_res', 'id_autor_ciudad_res'],
-      dependsOn: 'tutela_para_quien',
-      visibleWhen: 'Para mí',
     ),
     Question(
       id: "q7",
@@ -83,10 +88,12 @@ final tutelaSaludFlow = FlowConfiguration(
 
     // fin de preguntas para mi
 
+
+
     Question(
       id: 'q10',
-      questionText: '¿Cuál es el nombre del familiar?',
-      fieldName: 'nombre_familiar',
+      questionText: '¿Cuál es el nombre del afectado?',
+      fieldName: 'nombre_afectado',
       inputType: InputType.text,
       dependsOn: 'tutela_para_quien',
       visibleWhen: 'Para un familiar que no puede hacerla por sí mismo',
@@ -94,11 +101,21 @@ final tutelaSaludFlow = FlowConfiguration(
     Question(
       id: 'q11',
       questionText: '¿Número de identificación del afectado?', // ayuda
-      fieldName: 'id_familiar',
+      fieldName: 'id_afectado',
       inputType: InputType.text,
       dependsOn: 'tutela_para_quien',
       visibleWhen: 'Para un familiar que no puede hacerla por sí mismo',
     ),
+
+    Question(
+      id: 'q20',
+      questionText: '¿Cual es la edad del afectado?', // ayuda
+      fieldName: 'edad_afectado',
+      inputType: InputType.text,
+      dependsOn: 'tutela_para_quien',
+      visibleWhen: 'Para un familiar que no puede hacerla por sí mismo',
+    ),
+
 
     //Preguntas restantes
 
@@ -113,6 +130,7 @@ final tutelaSaludFlow = FlowConfiguration(
       id: "q13",
       fieldName: 'regimen',
       questionText: '¿Cual es el regimen de afiliación de la EPS?', // info
+      helper: "El Regimen de la EPS",
       inputType: InputType.dropdown,
     ),
 
@@ -133,7 +151,7 @@ final tutelaSaludFlow = FlowConfiguration(
     Question(
       id: 'q16',
       fieldName: 'grupo_especial',
-      questionText: '¿Es usted adulto mayor, menor de edad, '
+      questionText: '¿El afectado es adulto mayor, menor de edad, '
           'persona con discapacidad, víctima del conflicto o '
           'pertenece a población vulnerable?',
       inputType: InputType.yesOrNo,

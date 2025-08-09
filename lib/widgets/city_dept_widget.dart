@@ -22,11 +22,25 @@ class DepartamentoCiudadSelector extends StatefulWidget {
 class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector> {
   String? selectedDepartamento;
   String? selectedCiudad;
+  @override
+  void initState() {
+    super.initState();
+    selectedDepartamento = null;
+    selectedCiudad = null;
+  }
 
   Widget buildLabelWithHelper(String text, String? helperText) {
+    // Inherit the current themed default text style, then tweak the size
+    final baseStyle = DefaultTextStyle.of(context).style.copyWith(fontSize: 18);
+
+    // Make the helper badge adapt to theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final badgeBg = isDark ? Colors.white24 : Colors.grey.shade300;
+    final badgeFg = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
+
     return RichText(
       text: TextSpan(
-        style: const TextStyle(fontSize: 18, color: Colors.black),
+        style: baseStyle, // <- themed color now
         children: [
           TextSpan(text: text),
           if (helperText != null)
@@ -40,17 +54,17 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
                     width: 18,
                     height: 18,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: badgeBg,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
+                    child: Text(
                       'i',
-                      style: TextStyle(
+                      style: baseStyle.copyWith(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: badgeFg,
                       ),
                     ),
                   ),
@@ -65,6 +79,7 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
   @override
   Widget build(BuildContext context) {
     final ciudades = selectedDepartamento != null ? colombiaGeo[selectedDepartamento] ?? [] : [];
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -186,6 +201,8 @@ class _DepartamentoCiudadSelectorState extends State<DepartamentoCiudadSelector>
                 widget.fieldNames[0]: selectedDepartamento!,
                 widget.fieldNames[1]: selectedCiudad!,
               };
+
+              print(result);
               widget.onSubmit(result);
             }
                 : null,

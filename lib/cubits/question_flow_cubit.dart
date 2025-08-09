@@ -45,7 +45,12 @@ class QuestionFlowCubit extends Cubit<QuestionFlowState> {
     final currentQuestion = visibleQuestions[state.currentIndex];
 
     final updatedAnswers = Map<String, dynamic>.from(state.answers);
-    updatedAnswers[currentQuestion.fieldName] = answer;
+
+    if (answer is Map<String, dynamic>) {
+      updatedAnswers.addAll(answer);
+    } else {
+      updatedAnswers[currentQuestion.fieldName] = answer;
+    }
 
     if (state.currentIndex + 1 < visibleQuestions.length) {
       emit(state.copyWith(
@@ -68,5 +73,28 @@ class QuestionFlowCubit extends Cubit<QuestionFlowState> {
 
   void resetFlow() {
     emit(QuestionFlowState.initial());
+  }
+  void submitMultipleAnswers(Map<String, dynamic> newAnswers) {
+    final visibleQuestions = questions.where((q) {
+      if (q.dependsOn == null) return true;
+      return state.answers[q.dependsOn] == q.visibleWhen;
+    }).toList();
+
+    final currentQuestion = visibleQuestions[state.currentIndex];
+
+    final updatedAnswers = Map<String, dynamic>.from(state.answers)
+      ..addAll(newAnswers);
+
+    if (state.currentIndex + 1 < visibleQuestions.length) {
+      emit(state.copyWith(
+        currentIndex: state.currentIndex + 1,
+        answers: updatedAnswers,
+      ));
+    } else {
+      emit(state.copyWith(
+        answers: updatedAnswers,
+        isCompleted: true,
+      ));
+    }
   }
 }

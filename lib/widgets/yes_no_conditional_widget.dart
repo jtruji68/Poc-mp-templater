@@ -26,6 +26,53 @@ class _YesNoConditionalInputState extends State<YesNoConditionalInput> {
     super.dispose();
   }
 
+  Widget buildLabelWithHelper(String text, String? helperText) {
+    // Inherit themed text color and size
+    final baseStyle = DefaultTextStyle.of(context).style.copyWith(fontSize: 18);
+
+    // Helper badge colors adapt to theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final badgeBg = isDark ? Colors.white24 : Colors.grey.shade300;
+    final badgeFg = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
+
+    return RichText(
+      text: TextSpan(
+        style: baseStyle,
+        children: [
+          TextSpan(text: text),
+          if (helperText != null)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Tooltip(
+                message: helperText,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: badgeBg,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'i',
+                      style: baseStyle.copyWith(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        color: badgeFg,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final showTextField = selectedOption == 'Sí';
@@ -33,42 +80,7 @@ class _YesNoConditionalInputState extends State<YesNoConditionalInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(fontSize: 18, color: Colors.black),
-            children: [
-              TextSpan(text: widget.label),
-              if (widget.helper != null)
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Tooltip(
-                    message: widget.helper!,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'i',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+        buildLabelWithHelper(widget.label, widget.helper),
         const SizedBox(height: 12),
         DropdownMenu<String>(
           width: 400,

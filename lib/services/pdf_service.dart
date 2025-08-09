@@ -117,7 +117,7 @@ class PdfService {
       edadAfectado = answers['edad_afectado'] ?? '99';
 
       if(diagnostico != ""){
-        diagnosticoTexto = " y fue diagnosticado con $diagnostico.";
+        diagnosticoTexto = " y fue diagnosticado con: $diagnostico.";
       }
       else {
         diagnosticoTexto = ".";
